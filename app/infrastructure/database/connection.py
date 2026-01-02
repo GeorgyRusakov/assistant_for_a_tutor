@@ -9,11 +9,11 @@ logger = logging.getLogger(__name__)
 
 # Функция, которая возвращает безопасную cтроку, содержащую ссылку для подключения к PostgreSQL
 def build_pg_conninfo(
-    db_name: str,
-    host: str,
-    port: int,
-    user: str,
-    password: str,
+        db_name: str,
+        host: str,
+        port: int,
+        user: str,
+        password: str,
 ) -> str:
     conninfo = (
         f"postgresql://{quote(user, safe='')}:{quote(password, safe='')}"
@@ -21,7 +21,7 @@ def build_pg_conninfo(
     )
     logger.debug(f"Building PostgreSQL connection string (password omitted): "
                  f"postgresql://{quote(user, safe='')}@{host}:{port}/{db_name}")
-    logger.info('Строка для подключения conninfo:', conninfo)
+    logger.info(f"Строка для подключения conninfo: {conninfo}")
     return conninfo
 
 
@@ -37,11 +37,11 @@ async def log_db_version(connection: AsyncConnection) -> None:
 
 
 async def get_pg_connection(
-    db_name: str,
-    host: str,
-    port: int,
-    user: str,
-    password: str,
+        db_name: str,
+        host: str,
+        port: int,
+        user: str,
+        password: str,
 ) -> AsyncConnection:
     conninfo = build_pg_conninfo(db_name, host, port, user, password)
     connection: AsyncConnection | None = None
@@ -59,14 +59,14 @@ async def get_pg_connection(
 
 # Функция, возвращающая пул соединений с СУБД PostgreSQL
 async def get_pg_pool(
-    db_name: str,
-    host: str,
-    port: int,
-    user: str,
-    password: str,
-    min_size: int = 1,
-    max_size: int = 3,
-    timeout: float | None = 10.0,
+        db_name: str,
+        host: str,
+        port: int,
+        user: str,
+        password: str,
+        min_size: int = 1,
+        max_size: int = 3,
+        timeout: float | None = 10.0,
 ) -> AsyncConnectionPool:
     conninfo = build_pg_conninfo(db_name, host, port, user, password)
     db_pool: AsyncConnectionPool | None = None
@@ -91,6 +91,3 @@ async def get_pg_pool(
         if db_pool and not db_pool.closed:
             await db_pool.close()
         raise
-
-
-

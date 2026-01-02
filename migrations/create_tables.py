@@ -36,7 +36,7 @@ async def main():
                             CREATE TABLE IF NOT EXISTS students(
                             id SERIAL PRIMARY KEY,
                             name VARCHAR(30) NOT NULL,
-                            grade INT NOT NULL
+                            grade VARCHAR(10) NOT NULL
                             );
                             """
                     )
