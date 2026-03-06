@@ -7,21 +7,161 @@ from psycopg import AsyncConnection
 logger = logging.getLogger(__name__)
 
 
+# Функция добавления ученика
 async def add_student(
         conn: AsyncConnection,
         *,
         name: str,
-        grade: str,
-        price: int,
-        subject: str
+        grade_stud: str,
+) -> tuple[Any, ...] | None:
+    async with conn.cursor() as cursor:
+        data = await cursor.execute(
+            query="""
+                INSERT INTO students(name, grade)
+                VALUES(%s, %s) 
+                ON CONFLICT DO NOTHING
+                RETURNING id;
+            """,
+            params=(name, grade_stud)
+        )
+        row = await data.fetchone()
+        logger.info("Student added")
+        return row if row else None
+
+
+# Функция добавления нового расписания
+async def add_timetable(
+        conn: AsyncConnection,
+        id_student: int,
+        id_subject: int,
+        day_week: str,
+        time: str
 ) -> None:
     async with conn.cursor() as cursor:
         await cursor.execute(
             query="""
-                INSERT INTO students(name, grade, price, subject)
-                VALUES(%s, %s, %s, %s) 
+                INSERT INTO timetable(id_student, id_subject, day_week, time)
+                VALUES(%s, %s, %s, %s)
                 ON CONFLICT DO NOTHING;
             """,
-            params=(name, grade, price, subject)
+            params=(id_student, id_subject, day_week, time)
         )
-    logger.info("Student added")
+    logger.info("Timetable added")
+
+
+# Функция получения списка учеников
+async def get_students(conn: AsyncConnection) -> tuple[Any, ...] | None:
+    async with conn.cursor() as cursor:
+        data = await cursor.execute(
+            query="""
+                SELECT 
+                    id,
+                    name
+                    FROM students;
+            """
+        )
+        row = await data.fetchall()
+        logger.info("Row is %s", row)
+        return row if row else None
+
+
+# Функция получения расписания по конкретному дню недели
+async def get_timetable(conn: AsyncConnection, day_week) -> tuple[Any, ...] | None:
+    async with conn.cursor() as cursor:
+        data = await cursor.execute(
+            query="""
+            SELECT stud.name, sub.name, day_week, time FROM timetable AS time
+            JOIN students AS stud ON stud.id = time.id_student
+            JOIN subject AS sub ON sub.id = time.id_subject
+            WHERE day_week = %s
+            ORDER BY time ASC;
+            """,
+            params=(day_week,)
+        )
+        row = await data.fetchall()
+        logger.info("Row is %s", row)
+        return row if row else None
+
+
+# Функция для получения последнего добавленного ученика из бд
+async def get_context_last_id_stud(conn: AsyncConnection, name_stud, grade_stud) -> tuple[Any, ...] | None:
+    async with conn.cursor() as cursor:
+        data = await cursor.execute(
+            query="""
+            SELECT id FROM students
+            WHERE name = %s and grade = %s
+            ORDER BY id DESC
+            LIMIT 1;
+            """,
+            params=(name_stud, grade_stud,)
+        )
+        row = await data.fetchone()
+        logger.info("Row is %s", row)
+        return row if row else None
+
+
+# Функция добавления новых пар (предмет-ученик) в таблицу subject_students
+async def add_subject_students(
+        conn: AsyncConnection,
+        id_subject: int,
+        id_student: int,
+        price: int,
+) -> None:
+    async with conn.cursor() as cursor:
+        await cursor.execute(
+            query="""
+                INSERT INTO subject_students(id_subject, id_student, price)
+                VALUES(%s, %s, %s)
+                ON CONFLICT DO NOTHING;
+            """,
+            params=(id_subject, id_student, price)
+        )
+    logger.info("Student's subjects have been added")
+
+
+# Функция получения списка предметов, на которые записан ученик
+async def get_subject_stud(conn: AsyncConnection, id_student) -> tuple[Any, ...] | None:
+    async with conn.cursor() as cursor:
+        data = await cursor.execute(
+            query="""
+           SELECT subject.id, subject.name FROM subject
+            JOIN subject_students AS sub_stud ON sub_stud.id_subject = subject.id
+            Where sub_stud.id_student = %s
+            """,
+            params=(id_student,)
+        )
+        row = await data.fetchall()
+        logger.info("Row is %s", row)
+        return row if row else None
+
+
+# Функция получения id записи, содержащей, на какой предмет записан ученик
+async def get_id_subject_stud(conn: AsyncConnection, id_student, sub_select) -> tuple[Any, ...] | None:
+    async with conn.cursor() as cursor:
+        data = await cursor.execute(
+            query="""
+                   SELECT sub_stud.id FROM subject_students AS sub_stud
+                    Where sub_stud.id_student = %s AND sub_stud.id_subject = %s
+                    """,
+            params=(id_student, sub_select)
+        )
+        row = await data.fetchone()
+        logger.info("Row is %s", row)
+        return row if row else None
+
+
+# Функция добавления новой записи в журнал занятий
+async def add_class_journal(
+        conn: AsyncConnection,
+        id_subject_student: int
+) -> None:
+    async with conn.cursor() as cursor:
+        await cursor.execute(
+            query="""
+                INSERT INTO class_journal(id_subject_students)
+                VALUES(%s)
+                ON CONFLICT DO NOTHING;
+            """,
+            params=(id_subject_student,)
+        )
+    logger.info("Запись успешно добавлена")

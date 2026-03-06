@@ -36,6 +36,7 @@ async def log_db_version(connection: AsyncConnection) -> None:
         logger.warning("Failed to fetch DB version: %s", e)
 
 
+# Функция, возвращающая открытое соединение с СУБД PostgreSQL
 async def get_pg_connection(
         db_name: str,
         host: str,

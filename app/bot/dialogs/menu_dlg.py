@@ -20,10 +20,10 @@ main_menu = Dialog(
         Format('{menu}'),
         Group(
             Column(
-                Button(
+                Start(
                     text=Const('🧮 Журнал занятий'),
-                    id='button_1',
-                    on_click=button_clicked),
+                    id='go_journal_dialog',
+                    state=states.ClassJournal.preview),
                 Button(
                     text=Const('📊📈 Фин. отчетность'),
                     id='button_2',
@@ -32,12 +32,12 @@ main_menu = Dialog(
             Row(
                 Start(
                     text=Const('🆕 Добавление/удаление учеников'),
-                    id='go_second_dialog',
+                    id='go_add_dialog',
                     state=states.AddDeleteStud.select_opt),
-                Button(
+                Start(
                     text=Const('📆🕒 Расписание занятий'),
-                    id='button_2',
-                    on_click=button_clicked),
+                    id='go_timetable_dialog',
+                    state=states.Timetable.preview),
                 Button(
                     text=Const('📌📝 Заметки по ученикам'),
                     id='button_3',

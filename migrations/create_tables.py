@@ -44,13 +44,13 @@ async def main():
                         query="""
                         CREATE TABLE IF NOT EXISTS subject(
                         id SERIAL PRIMARY KEY,
-                        item_name VARCHAR(20) NOT NULL
+                        name VARCHAR(20) NOT NULL
                         );
                         """
                     )
                     await cursor.execute(
                         query="""
-                        CREATE TABLE IF NOT EXISTS classes
+                        CREATE TABLE IF NOT EXISTS lessons
                         id SERIAL PRIMARY KEY,
                         id_student INT NOT NULL REFERENCES students(id),
                         id_subject INT NOT NULL REFERENCES subject(id),
@@ -61,17 +61,35 @@ async def main():
                     )
                     await cursor.execute(
                         query="""
-                        CREATE TABLE IF NOT EXISTS timetable
-                        id SERIAL PRIMARY KEY,
-                        id_student INT NOT NULL REFERENCES students(id),
-                        id_subject INT NOT NULL REFERENCES subject(id),
-                        day_week VARCHAR(20) NOT NULL,
-                        time TIMESTAMPTZ NOT NULL,
-                        price INT NOT NUll
-                        );
+                        CREATE TABLE IF NOT EXISTS timetable(
+                         id SERIAL PRIMARY KEY,
+                         id_student INT NOT NULL REFERENCES students(id),
+                         id_subject INT NOT NULL REFERENCES subject(id),
+                         day_week VARCHAR(20) NOT NULL,
+                         time TIME NOT NULL
+                         );
                         """
                     )
-                logger.info("Tables `students`, `subject`, classes`, `timetable` were successfully created")
+                    await cursor.execute(
+                        query="""
+                        CREATE TABLE IF NOT EXISTS subject_students(
+                            id SERIAL PRIMARY KEY,
+                            id_subject INT NOT NULL REFERENCES subject(id),
+                            id_student INT NOT NULL REFERENCES students(id),
+                            price INT
+                            );
+                        """
+                    )
+                    await cursor.execute(
+                        query="""
+                        CREATE TABLE IF NOT EXISTS class_journal(
+                            id SERIAL PRIMARY KEY,
+                            id_subject_students INT NOT NULL REFERENCES subject_students(id),
+                            date DATE NOT NULL DEFAULT CURRENT_DATE
+                            );
+                        """
+                    )
+                logger.info("Tables were successfully created")
     except Error as db_error:
         logger.exception("Database-specific error: %s", db_error)
     except Exception as e:

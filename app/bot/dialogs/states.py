@@ -19,3 +19,16 @@ class AddDeleteStud(StatesGroup):
     delete = State()
 
 
+class ClassJournal(StatesGroup):
+    preview = State()
+    journal = State()
+    selected_stud = State()
+
+
+class Timetable(StatesGroup):
+    preview = State()
+    view_timetable = State()
+    add_timetable_step_1 = State()
+    add_timetable_step_2 = State()
+    add_timetable_step_3 = State()
+    add_timetable_step_4 = State()
