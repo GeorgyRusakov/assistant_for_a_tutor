@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def name_check(text: str) -> str:
-    if all(ch.isalpha() for ch in text) and len(text) < 40:
+    if text.replace(" ", "").isalpha() and len(text) < 50:
         return text
     raise ValueError
 

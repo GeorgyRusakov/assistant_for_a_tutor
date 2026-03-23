@@ -32,3 +32,11 @@ class Timetable(StatesGroup):
     add_timetable_step_2 = State()
     add_timetable_step_3 = State()
     add_timetable_step_4 = State()
+
+
+class Finance(StatesGroup):
+    finpreview = State()
+    fin_report = State()
+    fin_report_week = State()
+    fin_report_month = State()
+

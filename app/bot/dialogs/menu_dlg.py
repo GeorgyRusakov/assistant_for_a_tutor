@@ -24,10 +24,10 @@ main_menu = Dialog(
                     text=Const('🧮 Журнал занятий'),
                     id='go_journal_dialog',
                     state=states.ClassJournal.preview),
-                Button(
+                Start(
                     text=Const('📊📈 Фин. отчетность'),
                     id='button_2',
-                    on_click=button_clicked),
+                    state=states.Finance.finpreview),
             ),
             Row(
                 Start(

@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from typing import Any
 # from app.bot.enums.roles import UserRole
 from psycopg import AsyncConnection
+from datetime import date
 
 logger = logging.getLogger(__name__)
 
@@ -153,15 +154,66 @@ async def get_id_subject_stud(conn: AsyncConnection, id_student, sub_select) -> 
 # Функция добавления новой записи в журнал занятий
 async def add_class_journal(
         conn: AsyncConnection,
-        id_subject_student: int
+        id_subject_student: int,
+        select_day: date,
 ) -> None:
     async with conn.cursor() as cursor:
         await cursor.execute(
             query="""
-                INSERT INTO class_journal(id_subject_students)
-                VALUES(%s)
+                INSERT INTO class_journal(id_subject_students, date)
+                VALUES(%s, %s)
                 ON CONFLICT DO NOTHING;
             """,
-            params=(id_subject_student,)
+            params=(id_subject_student, select_day,)
         )
     logger.info("Запись успешно добавлена")
+
+
+# Функция получения суммарной стоимости занятий за неделю
+async def get_sum_price_week(conn: AsyncConnection, start_week, end_week) -> tuple[Any, ...] | None:
+    async with conn.cursor() as cursor:
+        data = await cursor.execute(
+            query="""
+            SELECT SUM(sub_stud.price) FROM subject_students AS sub_stud
+            JOIN class_journal AS cls ON cls.id_subject_students = sub_stud.id
+            WHERE cls.date >= %s::date AND cls.date <= %s::date
+            """,
+            params=(start_week, end_week,)
+        )
+        row = await data.fetchone()
+        logger.info("Row is %s", row)
+        return row if row else None
+
+
+# Функция получения суммарной стоимости занятий за месяц
+async def get_sum_price_month(conn: AsyncConnection, current_month) -> tuple[Any, ...] | None:
+    async with conn.cursor() as cursor:
+        data = await cursor.execute(
+            query="""
+            SELECT SUM(sub_stud.price) FROM subject_students AS sub_stud
+            JOIN class_journal AS cls ON cls.id_subject_students = sub_stud.id
+            WHERE EXTRACT(MONTH FROM cls.date) = %s;
+            """,
+            params=(current_month,)
+        )
+        row = await data.fetchone()
+        logger.info("Row is %s", row)
+        return row if row else None
+
+
+# Функция получения всех проведенных занятий (сохраняю на всякий случай)
+async def get_completed_lesson(conn: AsyncConnection, current_month) -> tuple[Any, ...] | None:
+    async with conn.cursor() as cursor:
+        data = await cursor.execute(
+            query="""
+            SELECT stud.name, stud.grade, sub_stud.price, cls.date FROM students as stud
+            JOIN subject_students as sub_stud ON sub_stud.id_student = stud.id
+            JOIN class_journal as cls ON cls.id_subject_students = sub_stud.id
+            ORDER BY date DESC
+            """,
+            params=(current_month,)
+        )
+        row = await data.fetchone()
+        logger.info("Row is %s", row)
+        return row if row else None
+

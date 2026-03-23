@@ -12,6 +12,7 @@ from app.bot.dialogs.menu_dlg import main_menu
 from app.bot.dialogs.add_delete_stud import add_del_stud
 # from app.bot.dialogs.class_journal_exp import class_journal
 from app.bot.dialogs.class_journal.dialogs.journal_dialogs import journal_dialogs
+from app.bot.dialogs.financial_statements.dialogs.fin_dialogs import finance
 from app.bot.dialogs.timetable_dlg import timetable_dlg
 from aiogram_dialog import setup_dialogs
 from app.locale.ru import RU
@@ -20,12 +21,21 @@ from app.bot.middelwares.db_middleware import DataBaseMiddleware
 from app.infrastructure.database.connection import get_pg_pool
 import psycopg_pool
 # from redis.asyncio import Redis
+from aiogram.client.session.aiohttp import AiohttpSession
+from aiohttp_socks import ProxyConnector
+from aiohttp import ClientSession
 
 logger = logging.getLogger(__name__)
 
 
 async def main() -> None:
     config: Config = load_config()
+
+    proxy_url = 'socks5://joVnuy:XeDqSr@168.81.66.31:8000'
+    # connector = ProxyConnector.from_url(proxy_url)
+    session = AiohttpSession(
+        proxy=proxy_url  # Для aiogram 3.x это самый короткий путь
+    )
 
     logging.basicConfig(
         level=logging.getLevelName(level=config.log.level),
@@ -47,6 +57,7 @@ async def main() -> None:
     bot = Bot(
         token=config.bot.token,
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+        session=session
     )
     # dp = Dispatcher(storage=storage)
     dp = Dispatcher()
@@ -66,6 +77,7 @@ async def main() -> None:
     # dp.include_routers(class_journal)
     dp.include_routers(journal_dialogs)
     dp.include_routers(timetable_dlg)
+    dp.include_routers(finance)
     setup_dialogs(dp)
 
     logger.info("Including middlewares...")

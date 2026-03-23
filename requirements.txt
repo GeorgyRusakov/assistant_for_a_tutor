@@ -26,3 +26,4 @@ psycopg2-binary==2.9.10
 psycopg-binary==3.2.6
 babel==2.18.0
 aiogram_dialog==2.5.0
+aiohttp-socks

@@ -44,7 +44,7 @@ async def timetable_preview_getter(dialog_manager: DialogManager, local: dict, *
 
 async def timetable_view_getter(dialog_manager: DialogManager, local: dict, **kwargs):
     current_page = await dialog_manager.find('id_stub_scroll').get_page()
-    conn = dialog_manager.middleware_data.get('conn')
+    conn: AsyncConnection = dialog_manager.middleware_data.get('conn')
     ru_day_dict = dialog_manager.dialog_data.get('ru_day_dict')
     day_week = ru_day_dict.get(current_page)
     timetable = await get_timetable(conn=conn, day_week=day_week)
@@ -90,11 +90,13 @@ async def finish_timetable_getter(dialog_manager: DialogManager, local: dict, **
     input_time = f'{time_hour}:{time_minute}'
 
     lst_stud = []  # Если начинаем добавлять расписание из окна добавления
-    # ученика, то список студетнтов не загружается в dialog_data
+    # ученика, то список студентов не загружается в dialog_data
     if dialog_manager.dialog_data.get('lst_stud') is None:
         conn = dialog_manager.middleware_data.get('conn')
         stud_row = await get_students(conn)
         lst_stud = [(f'{i[1]}', i[0]) for i in stud_row]
+    else:
+        lst_stud = dialog_manager.dialog_data.get('lst_stud')
 
     if dialog_manager.dialog_data.get('ru_day_dict') is None:
         await lst_subject_add_data(dialog_manager)
@@ -139,6 +141,12 @@ async def timetable_add_getter(dialog_manager: DialogManager, local: dict, **kwa
     else:
         logger.info('id ученика не найден, список предметов не получен')
 
+    if not subjects:
+        subjects = [
+            (1, 'Математика'),
+            (2, 'Физика'),
+        ]
+
     ru_day_abbreviated = get_day_names('abbreviated', locale='ru_Ru')
 
     ru_day_dict_abbrev = dict(ru_day_abbreviated)
@@ -170,17 +178,15 @@ async def set_stud_default(_, dialog_manager: DialogManager):
     if dialog_manager.start_data is not None:
         context_stud = dialog_manager.start_data
 
-    print(dialog_manager.start_data)
+        conn: AsyncConnection = dialog_manager.middleware_data.get('conn')
+        id_stud = await get_context_last_id_stud(conn, *context_stud)
 
-    conn: AsyncConnection = dialog_manager.middleware_data.get('conn')
-    id_stud = await get_context_last_id_stud(conn, *context_stud)
+        print(dialog_manager.start_data)
 
-    print(type(id_stud), id_stud)
-
-    if id_stud is not None:
-        dialog_manager.dialog_data.update(current_id_stud=id_stud[0])
-        radio_stud: ManagedRadio = dialog_manager.find('radio3_stud')
-        await radio_stud.set_checked(str(id_stud[0]))
+        if id_stud is not None:
+            dialog_manager.dialog_data.update(current_id_stud=id_stud[0])
+            radio_stud: ManagedRadio = dialog_manager.find('radio3_stud')
+            await radio_stud.set_checked(str(id_stud[0]))
 
 
 async def hour_click(callback: CallbackQuery, counter, dialog_manager: DialogManager, value):
