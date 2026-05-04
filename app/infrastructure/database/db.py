@@ -217,3 +217,20 @@ async def get_completed_lesson(conn: AsyncConnection, current_month) -> tuple[An
         logger.info("Row is %s", row)
         return row if row else None
 
+
+# Функция для получения статистики суммы занятий по месяцам
+async def get_sum_months(conn: AsyncConnection, current_month) -> tuple[Any, ...] | None:
+    async with conn.cursor() as cursor:
+        data = await cursor.execute(
+            query="""
+               SELECT EXTRACT(MONTH FROM cls.date) as month, SUM(sub_stud.price) FROM subject_students AS sub_stud
+               JOIN class_journal AS cls ON cls.id_subject_students = sub_stud.id
+               GROUP BY month
+               """,
+            params=(current_month,)
+        )
+        row = await data.fetchone()
+        logger.info("Row is %s", row)
+        return row if row else None
+
+
