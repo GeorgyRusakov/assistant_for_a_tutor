@@ -1,4 +1,5 @@
 import asyncio
+import sys
 import logging
 
 from config.config import Config, load_config
@@ -24,6 +25,9 @@ import psycopg_pool
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiohttp_socks import ProxyConnector
 from aiohttp import ClientSession
+
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 logger = logging.getLogger(__name__)
 
