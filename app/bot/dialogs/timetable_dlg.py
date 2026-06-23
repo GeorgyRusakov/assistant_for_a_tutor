@@ -207,7 +207,7 @@ async def get_stud_getter(dialog_manager: DialogManager, local: dict, conn: Asyn
     dialog_manager.dialog_data.update(lst_stud=lst_stud)
     return {'stud_row': lst_stud,
             'len_stud_row': len(stud_row),
-            'window_journal_view': local['window_journal_view']}
+            'window_add_lesson_view': local['window_add_lesson_view']}
 
 
 timetable_dlg = Dialog(

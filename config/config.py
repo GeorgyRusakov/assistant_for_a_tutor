@@ -35,6 +35,12 @@ class RedisSettings:
     password: str
     username: str
 
+@dataclass
+class Proxy:
+    ip: int
+    port: int
+    login: str
+    password: str
 
 @dataclass
 class Config:
@@ -42,6 +48,7 @@ class Config:
     log: LoggSettings
     db: DatabaseSettings
     redis: RedisSettings
+    proxy: Proxy
 
 
 def load_config(path: str | None = None) -> Config:
@@ -83,11 +90,19 @@ def load_config(path: str | None = None) -> Config:
         username=env("REDIS_USERNAME", default=""),
     )
 
+    proxy = Proxy(
+        ip=env("IP_PROXY"),
+        port=env("PORT_PROXY"),
+        login=env("LOGIN_PROXY"),
+        password=env("PASSWORD_PROXY"),
+    )
+
     logger.info("Configuration loaded successfully")
 
     return Config(
         bot=BotSettings(token=token, admin_ids=admin_ids),
         log=logg_settings,
         db=db,
-        redis=redis
+        redis=redis,
+        proxy=proxy,
     )

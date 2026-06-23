@@ -22,6 +22,7 @@ class AddDeleteStud(StatesGroup):
 class ClassJournal(StatesGroup):
     preview = State()
     journal = State()
+    add_lesson = State()
     selected_stud = State()
 
 
@@ -39,4 +40,3 @@ class Finance(StatesGroup):
     fin_report = State()
     fin_report_week = State()
     fin_report_month = State()
-

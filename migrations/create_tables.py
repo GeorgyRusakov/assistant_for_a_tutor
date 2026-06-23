@@ -16,6 +16,9 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+if sys.platform.startswith("win") or os.name == "nt":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 
 async def main():
     connection: AsyncConnection | None = None
@@ -33,41 +36,19 @@ async def main():
                 async with connection.cursor() as cursor:
                     await cursor.execute(
                         query="""
-                            CREATE TABLE IF NOT EXISTS students(
+                        CREATE TABLE IF NOT EXISTS students(
                             id SERIAL PRIMARY KEY,
                             name VARCHAR(30) NOT NULL,
                             grade VARCHAR(10) NOT NULL
-                            );
-                            """
+                        );
+                        """
                     )
                     await cursor.execute(
                         query="""
                         CREATE TABLE IF NOT EXISTS subject(
-                        id SERIAL PRIMARY KEY,
-                        name VARCHAR(20) NOT NULL
+                            id SERIAL PRIMARY KEY,
+                            name VARCHAR(30) NOT NULL
                         );
-                        """
-                    )
-                    await cursor.execute(
-                        query="""
-                        CREATE TABLE IF NOT EXISTS lessons
-                        id SERIAL PRIMARY KEY,
-                        id_student INT NOT NULL REFERENCES students(id),
-                        id_subject INT NOT NULL REFERENCES subject(id),
-                        class_date DATE NOT NULL DEFAULT CURRENT_DATE,
-                        price INT NOT NULL REFERENCES timetable(price)
-                        );
-                        """
-                    )
-                    await cursor.execute(
-                        query="""
-                        CREATE TABLE IF NOT EXISTS timetable(
-                         id SERIAL PRIMARY KEY,
-                         id_student INT NOT NULL REFERENCES students(id),
-                         id_subject INT NOT NULL REFERENCES subject(id),
-                         day_week VARCHAR(20) NOT NULL,
-                         time TIME NOT NULL
-                         );
                         """
                     )
                     await cursor.execute(
@@ -77,7 +58,7 @@ async def main():
                             id_subject INT NOT NULL REFERENCES subject(id),
                             id_student INT NOT NULL REFERENCES students(id),
                             price INT
-                            );
+                        );
                         """
                     )
                     await cursor.execute(
@@ -86,7 +67,18 @@ async def main():
                             id SERIAL PRIMARY KEY,
                             id_subject_students INT NOT NULL REFERENCES subject_students(id),
                             date DATE NOT NULL DEFAULT CURRENT_DATE
-                            );
+                        );
+                        """
+                    )
+                    await cursor.execute(
+                        query="""
+                        CREATE TABLE IF NOT EXISTS timetable(
+                            id SERIAL PRIMARY KEY,
+                            id_student INT NOT NULL REFERENCES students(id),
+                            id_subject INT NOT NULL REFERENCES subject(id),
+                            day_week VARCHAR(20) NOT NULL,
+                            time TIME NOT NULL
+                        );
                         """
                     )
                 logger.info("Tables were successfully created")

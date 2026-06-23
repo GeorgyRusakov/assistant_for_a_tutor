@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 async def main() -> None:
     config: Config = load_config()
 
-    proxy_url = 'socks5://joVnuy:XeDqSr@168.81.66.31:8000'
+    proxy_url = f'socks5://{config.proxy.login}:{config.proxy.password}@{config.proxy.ip}:{config.proxy.port}'
     # connector = ProxyConnector.from_url(proxy_url)
     session = AiohttpSession(
         proxy=proxy_url  # Для aiogram 3.x это самый короткий путь
