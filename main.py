@@ -7,14 +7,17 @@ from aiogram import Bot, Dispatcher
 # from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from app.bot.dialogs.start_dlg import user_router
-from app.bot.dialogs.start_dlg import start_dialog
+
+
+from app.bot.dialogs.start_dlg import start_dialog, user_router
 from app.bot.dialogs.menu_dlg import main_menu
 from app.bot.dialogs.add_delete_stud import add_del_stud
 # from app.bot.dialogs.class_journal_exp import class_journal
-from app.bot.dialogs.class_journal.dialogs.journal_dialogs import journal_dialogs
+from app.bot.dialogs.class_journal.journal_dialogs import journal_dialogs
 from app.bot.dialogs.financial_statements.dialogs.fin_dialogs import finance
 from app.bot.dialogs.timetable_dlg import timetable_dlg
+
+
 from aiogram_dialog import setup_dialogs
 from app.locale.ru import RU
 from app.bot.middelwares.db_middleware import DataBaseMiddleware
