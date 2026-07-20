@@ -21,7 +21,10 @@ class AddDeleteStud(StatesGroup):
 
 class ClassJournal(StatesGroup):
     preview = State()
-    journal = State()
+    journal_year = State()
+    journal_month = State()
+    journal_view = State()
+    card_view = State()
     add_lesson = State()
     selected_stud = State()
 

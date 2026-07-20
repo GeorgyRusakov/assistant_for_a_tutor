@@ -19,7 +19,7 @@ async def add_student(
         data = await cursor.execute(
             query="""
                 INSERT INTO students(name, grade)
-                VALUES(%s, %s) 
+                VALUES(%s, %s)
                 ON CONFLICT DO NOTHING
                 RETURNING id;
             """,
@@ -55,7 +55,7 @@ async def get_students(conn: AsyncConnection) -> tuple[Any, ...] | None:
     async with conn.cursor() as cursor:
         data = await cursor.execute(
             query="""
-                SELECT 
+                SELECT
                     id,
                     name
                     FROM students;
@@ -84,7 +84,7 @@ async def get_timetable(conn: AsyncConnection, day_week) -> tuple[Any, ...] | No
         return row if row else None
 
 
-# Функция для получения последнего добавленного ученика из бд
+# Функция получения последнего добавленного ученика из бд
 async def get_context_last_id_stud(conn: AsyncConnection, name_stud, grade_stud) -> tuple[Any, ...] | None:
     async with conn.cursor() as cursor:
         data = await cursor.execute(
@@ -201,6 +201,54 @@ async def get_sum_price_month(conn: AsyncConnection, current_month) -> tuple[Any
         return row if row else None
 
 
+# Функция получения списка уникальных годов
+async def get_classes_by_year(conn: AsyncConnection) -> tuple[Any, ...] | None:
+    async with conn.cursor() as cursor:
+        data = await cursor.execute(
+            query="""
+            SELECT EXTRACT(YEAR FROM cl.date) as year FROM class_journal cl
+            GROUP BY year;
+            """
+        )
+        row = await data.fetchall()
+        logger.info("Row is %s", row)
+        return row if row else None
+
+# Функция получения списка уникальных месяцев
+async def get_classes_by_month(conn: AsyncConnection, year: int) -> tuple[Any, ...] | None:
+    async with conn.cursor() as cursor:
+        data = await cursor.execute(
+            query="""
+            SELECT EXTRACT(MONTH FROM cl.date) as month FROM class_journal cl
+            WHERE EXTRACT(YEAR FROM cl.date) = %s
+            GROUP BY month;
+            """,
+            params=(year,)
+        )
+        row = await data.fetchall()
+        logger.info("Row is %s", row)
+        return row if row else None
+
+
+# Функция получения списка занятий за выбранный период (месяц - год)
+async def get_classes_by_month_year(conn: AsyncConnection, month: int, year: int) -> tuple[Any, ...] | None:
+    async with conn.cursor() as cursor:
+        data = await cursor.execute(
+            query="""
+            SELECT cls.id, stud.name, stud.grade, sub.name, sub_stud.price, cls.date FROM students as stud
+            JOIN subject_students as sub_stud ON sub_stud.id_student = stud.id
+            JOIN class_journal as cls ON cls.id_subject_students = sub_stud.id
+			JOIN subject as sub ON sub.id = sub_stud.id_subject
+			WHERE EXTRACT(YEAR FROM date) = %s and EXTRACT(MONTH FROM date) = %s
+            ORDER BY date DESC;
+            """,
+            params=(year, month,)
+        )
+        row = await data.fetchall()
+        logger.info("Row is %s", row)
+        return row if row else None
+
+
 # Функция получения всех проведенных занятий (сохраняю на всякий случай)
 async def get_completed_lesson(conn: AsyncConnection, current_month) -> tuple[Any, ...] | None:
     async with conn.cursor() as cursor:
@@ -232,5 +280,3 @@ async def get_sum_months(conn: AsyncConnection, current_month) -> tuple[Any, ...
         row = await data.fetchone()
         logger.info("Row is %s", row)
         return row if row else None
-
-

@@ -18,6 +18,22 @@ async def on_student_click(callback: CallbackQuery, widget: Any, manager: Dialog
     await manager.switch_to(state=states.ClassJournal.selected_stud)
 
 
+async def on_year_click(callback: CallbackQuery, widget: Any, manager: DialogManager, selected_item: str):
+    manager.dialog_data.update(selected_year=int(selected_item))
+    logger.info(f'Выбранный год: {selected_item}')
+    await manager.switch_to(state=states.ClassJournal.journal_month)
+
+
+async def on_month_click(callback: CallbackQuery, widget: Any, manager: DialogManager, selected_item: str):
+    manager.dialog_data.update(selected_month=int(selected_item))
+    logger.info(f'Выбранный месяц: {selected_item}')
+    await manager.switch_to(state=states.ClassJournal.journal_view)
+
+async def on_class_card_click(callback: CallbackQuery, widget: Any, manager: DialogManager, selected_item: str):
+    manager.dialog_data.update(selected_id_class_card=int(selected_item))
+    logger.info(f'ID выбранного занятия: {selected_item}')
+    await manager.switch_to(state=states.ClassJournal.card_view)
+
 async def date_button_prev_clicked(callback: CallbackQuery, button: Button,
                                    dialog_manager: DialogManager):
     current_day: date = dialog_manager.dialog_data.get('date')
