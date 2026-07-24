@@ -13,7 +13,7 @@ async def add_student(
         conn: AsyncConnection,
         *,
         name: str,
-        grade_stud: str,
+        grade: str,
 ) -> tuple[Any, ...] | None:
     async with conn.cursor() as cursor:
         data = await cursor.execute(
@@ -23,11 +23,11 @@ async def add_student(
                 ON CONFLICT DO NOTHING
                 RETURNING id;
             """,
-            params=(name, grade_stud)
+            params=(name, grade)
         )
         row = await data.fetchone()
         logger.info("Student added")
-        return row if row else None
+        return row[0] if row else None
 
 
 # Функция добавления нового расписания
@@ -55,15 +55,27 @@ async def get_students(conn: AsyncConnection) -> tuple[Any, ...] | None:
     async with conn.cursor() as cursor:
         data = await cursor.execute(
             query="""
-                SELECT
-                    id,
-                    name
-                    FROM students;
-            """
-        )
+                SELECT id, name, grade FROM students
+                WHERE is_deleted = FALSE;
+                """
+            )
         row = await data.fetchall()
         logger.info("Row is %s", row)
         return row if row else None
+
+
+# Функция удаления учеников
+async def delete_students(conn: AsyncConnection, lst_del_stud: list[int]):
+    async with conn.cursor() as cursor:
+        data = await cursor.execute(
+            query="""
+                UPDATE students
+                SET is_deleted = TRUE
+                WHERE id = ANY(%s);
+                """,
+                params=(lst_del_stud,)
+            )
+        logger.info("Student deleted")
 
 
 # Функция получения расписания по конкретному дню недели
@@ -102,7 +114,7 @@ async def get_context_last_id_stud(conn: AsyncConnection, name_stud, grade_stud)
 
 
 # Функция добавления новых пар (предмет-ученик) в таблицу subject_students
-async def add_subject_students(
+async def add_student_subject(
         conn: AsyncConnection,
         id_subject: int,
         id_student: int,

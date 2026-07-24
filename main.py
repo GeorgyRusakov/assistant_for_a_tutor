@@ -11,8 +11,9 @@ from aiogram.enums import ParseMode
 
 from app.bot.dialogs.start_dlg import start_dialog, user_router
 from app.bot.dialogs.menu_dlg import main_menu
-from app.bot.dialogs.add_delete_stud import add_del_stud
+# from app.bot.dialogs.add_delete_stud import add_del_stud
 # from app.bot.dialogs.class_journal_exp import class_journal
+from app.bot.dialogs.crud_student.crud_stud_dialogs import crud_student
 from app.bot.dialogs.class_journal.journal_dialogs import journal_dialogs
 from app.bot.dialogs.financial_statements.dialogs.fin_dialogs import finance
 from app.bot.dialogs.timetable_dlg import timetable_dlg
@@ -80,7 +81,7 @@ async def main() -> None:
     dp.include_routers(user_router)
     dp.include_routers(start_dialog)
     dp.include_routers(main_menu)
-    dp.include_routers(add_del_stud)
+    dp.include_routers(crud_student)
     # dp.include_routers(class_journal)
     dp.include_routers(journal_dialogs)
     dp.include_routers(timetable_dlg)

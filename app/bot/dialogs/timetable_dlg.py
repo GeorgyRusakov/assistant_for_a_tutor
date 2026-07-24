@@ -125,7 +125,7 @@ async def sending_timetable_data(callback: CallbackQuery, button: Button, dialog
     logger.info('Записываем данные в бд')
     await add_timetable(conn, *context_timetable)
 
-    await callback.message.answer(text=f'Данные отправлены на сервер! Возвращаемся в основное меню')
+    await callback.message.answer(text='Данные отправлены на сервер! Возвращаемся в основное меню')
     await dialog_manager.start(state=states.StartWork.menu, show_mode=ShowMode.DELETE_AND_SEND)
 
 
@@ -169,7 +169,7 @@ async def on_text_click(
         widget: ManagedCounter,
         dialog_manager: DialogManager
 ) -> None:
-    await event.answer(f"Что так мало? Не мелочись, ставь побольше!😁🤑")
+    await event.answer(f"Cтавь побольше!😁🤑")
 
 
 async def set_stud_default(_, dialog_manager: DialogManager):

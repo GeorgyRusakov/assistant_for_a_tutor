@@ -1,3 +1,4 @@
+from aiogram.enums import ParseMode
 from aiogram_dialog import Dialog, Window
 from aiogram_dialog.widgets.kbd import Button, Row, Column, Back,  SwitchTo, Select, Multiselect, \
     Checkbox, Radio, ScrollingGroup,\
@@ -197,7 +198,7 @@ view_class_card = Window(
     ),
     getter=view_card_getter,
     state=states.ClassJournal.card_view,
-
+    parse_mode=ParseMode.MARKDOWN_V2
 )
 
 
