@@ -26,23 +26,28 @@ finpreview = Window(
 )
 
 fin_report_week = Window(
-    Format('Финансовый отчет за текущую неделю: \n'
-           'Итоговый результат за неделю: {sum_price_week}'),
+    Format('Финансовый отчет за текущую ***неделю***: \n\n'
+           '***Итоговый результат\: {sum_total_week} руб\.*** \n'),
+    Format('***Общая статистика\:*** \n' \
+           '{report_table}'),
+    SwitchTo(Const('⬅️Назад'), id='st', state=states.Finance.finpreview),
+    MAIN_MENU_BUTTON,
+    parse_mode=ParseMode.MARKDOWN_V2,
     state=states.Finance.fin_report_week,
     getter=fin_report_week_getter,
 )
 
-fin_report_week = Window(
-    Format('Финансовый отчет за текущую неделю: \n'
-           'Итоговый результат за неделю: <b>{sum_price_week} руб.</b> \n'
-           'Итоговый результат за месяц: <b>{sum_price_month} руб.</b>'),
-    Column(
-        Back(Const('⬅️Назад')),
-        MAIN_MENU_BUTTON,
-    ),
-    state=states.Finance.fin_report_week,
-    getter=fin_report_week_getter,
-)
+# fin_report_week = Window(
+#     Format('Финансовый отчет за текущую неделю: \n'
+#            'Итоговый результат за неделю: <b>{sum_price_week} руб.</b> \n'
+#            'Итоговый результат за месяц: <b>{sum_price_month} руб.</b>'),
+#     Column(
+#         Back(Const('⬅️Назад')),
+#         MAIN_MENU_BUTTON,
+#     ),
+#     state=states.Finance.fin_report_week,
+#     getter=fin_report_week_getter,
+# )
 
 fin_report = Window(
     Const('Выберете, за какой срок подготовить отчет'),

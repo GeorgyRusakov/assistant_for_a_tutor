@@ -181,8 +181,8 @@ async def add_class_journal(
     logger.info("Запись успешно добавлена")
 
 
-# Функция получения суммарной стоимости занятий за неделю
 async def get_sum_price_week(conn: AsyncConnection, start_week, end_week) -> tuple[Any, ...] | None:
+    """Получает суммарную стоимость занятий за неделю"""
     async with conn.cursor() as cursor:
         data = await cursor.execute(
             query="""
@@ -209,6 +209,26 @@ async def get_sum_price_month(conn: AsyncConnection, current_month) -> tuple[Any
             params=(current_month,)
         )
         row = await data.fetchone()
+        logger.info("Row is %s", row)
+        return row if row else None
+
+
+async def get_statistics_for_the_week(conn: AsyncConnection, start_week, end_week) -> tuple[Any, ...] | None:
+    """Получает статистику за неделю по каждому ученику"""
+    async with conn.cursor() as cursor:
+        data = await cursor.execute(
+            query="""
+            SELECT s.name, COUNT(*) AS number_classes, SUM(ss.price) AS total_income
+            FROM class_journal cj
+            JOIN subject_students ss ON cj.id_subject_students = ss.id
+            JOIN students s ON ss.id_student = s.id
+            WHERE cj.date BETWEEN %s::date AND %s::date
+            GROUP BY s.name
+            ORDER BY total_income DESC;
+            """,
+            params=(start_week, end_week,)
+        )
+        row = await data.fetchall()
         logger.info("Row is %s", row)
         return row if row else None
 

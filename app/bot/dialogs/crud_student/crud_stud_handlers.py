@@ -77,16 +77,16 @@ async def sending_data(callback: CallbackQuery, button: Button, dialog_manager: 
 
 
 async def delete_students_handler(callback: CallbackQuery, button: Button, manager: DialogManager):
+    student_checked: list = manager.find('multi').get_checked()
+    logger.info('Список студентов на удаление: %s и тип: %s', student_checked, type(student_checked))
+
+    if not student_checked:
+        await callback.answer('Выберете хотя бы одного ученика для удаления!')
+        return
+
+    student_checked = list(map(int, student_checked))
+
     try:
-        student_checked: list = manager.find('multi').get_checked()
-        logger.info('Список студентов на удаление: %s и тип: %s', student_checked, type(student_checked))
-
-        if not student_checked:
-            await callback.answer('Выберете хотя бы одного ученика для удаления!')
-            return
-
-        student_checked = list(map(int, student_checked))
-
         conn = manager.middleware_data.get('conn')
 
         await delete_students(conn, student_checked)

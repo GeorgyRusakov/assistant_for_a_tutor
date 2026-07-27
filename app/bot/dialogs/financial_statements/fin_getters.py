@@ -7,6 +7,7 @@ from app.infrastructure.database.db import get_students, get_subject_stud, get_i
     get_sum_price_week, get_sum_price_month
 from psycopg import AsyncConnection
 from typing import Any
+from ...services.financial_service import create_financial_service
 
 from datetime import datetime, timedelta, date
 
@@ -40,17 +41,27 @@ async def fin_report_getter(dialog_manager: DialogManager, local: dict, **kwargs
 
 
 async def fin_report_week_getter(dialog_manager: DialogManager, local: dict, **kwargs):
-    today = datetime.now().date()
-    start_end_week: tuple = await get_current_date_week(today)
-    conn: AsyncConnection = dialog_manager.middleware_data.get('conn')
-    sum_price_week = await get_sum_price_week(conn, *start_end_week)
+    report_week: tuple = dialog_manager.dialog_data.get('week_report', ())
 
-    current_month = await get_current_date_month(today)
-    print(current_month)
-    sum_price_month = await get_sum_price_month(conn, current_month)
+    if report_week:
+        res_sum_week, res_report_table = report_week
+        logger.info('Получаем данные без повторного обращения к базе')
+    else:
+        service = create_financial_service(dialog_manager)
+        res_sum_week, res_report_table = await service.make_week_report()
+        dialog_manager.dialog_data.update(week_report=(res_sum_week, res_report_table))
 
-    return {'sum_price_week': sum_price_week[0] if sum_price_month else '0',
-            'sum_price_month': sum_price_month[0]}
+    # today = datetime.now().date()
+    # start_end_week: tuple = await get_current_date_week(today)
+    # conn: AsyncConnection = dialog_manager.middleware_data.get('conn')
+    # sum_price_week = await get_sum_price_week(conn, *start_end_week)
+
+    # current_month = await get_current_date_month(today)
+
+    # sum_price_month = await get_sum_price_month(conn, current_month)
+
+    return {'sum_total_week': res_sum_week,
+            'report_table': res_report_table}
 
 
 async def fin_report_month_getter(dialog_manager: DialogManager, local: dict, **kwargs):
