@@ -43,3 +43,5 @@ class Finance(StatesGroup):
     fin_report = State()
     fin_report_week = State()
     fin_report_month = State()
+    fin_report_months = State()
+    fin_all_time_report = State()

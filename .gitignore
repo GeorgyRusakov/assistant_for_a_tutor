@@ -16,3 +16,4 @@ __pycache__/
 .postgres_data_dev/
 .pgadmin_data_dev/
 .idea/
+test.py

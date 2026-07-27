@@ -2,7 +2,7 @@ FROM python:3.11-alpine
 
 WORKDIR /app
 
-# Установка зависимостей системы (не нужны компиляторы!)
+# Установка зависимостей системы
 RUN apk update && rm -rf /var/cache/apk/*
 
 # RUN rm -rf /var/lib/apt/lists/*
