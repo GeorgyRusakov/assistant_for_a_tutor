@@ -197,16 +197,16 @@ async def get_sum_price_week(conn: AsyncConnection, start_week, end_week) -> tup
         return row if row else None
 
 
-# Функция получения суммарной стоимости занятий за месяц
-async def get_sum_price_month(conn: AsyncConnection, current_month) -> tuple[Any, ...] | None:
+async def get_sum_price_month(conn: AsyncConnection, current_year, current_month) -> tuple[Any, ...] | None:
+    """Получает суммарную стоимость занятий за месяц"""
     async with conn.cursor() as cursor:
         data = await cursor.execute(
             query="""
             SELECT SUM(sub_stud.price) FROM subject_students AS sub_stud
             JOIN class_journal AS cls ON cls.id_subject_students = sub_stud.id
-            WHERE EXTRACT(MONTH FROM cls.date) = %s;
+            WHERE EXTRACT(YEAR FROM cls.date) = %s AND EXTRACT(MONTH FROM cls.date) = %s;
             """,
-            params=(current_month,)
+            params=(current_year, current_month,)
         )
         row = await data.fetchone()
         logger.info("Row is %s", row)
@@ -227,6 +227,25 @@ async def get_statistics_for_the_week(conn: AsyncConnection, start_week, end_wee
             ORDER BY total_income DESC;
             """,
             params=(start_week, end_week,)
+        )
+        row = await data.fetchall()
+        logger.info("Row is %s", row)
+        return row if row else None
+
+async def get_statistics_for_the_month(conn: AsyncConnection,  current_year, current_month) -> tuple[Any, ...] | None:
+    """Получает статистику за месяц по каждому ученику"""
+    async with conn.cursor() as cursor:
+        data = await cursor.execute(
+            query="""
+            SELECT s.name, COUNT(*) AS number_classes, SUM(ss.price) AS total_income
+            FROM class_journal cj
+            JOIN subject_students ss ON cj.id_subject_students = ss.id
+            JOIN students s ON ss.id_student = s.id
+            WHERE EXTRACT(YEAR FROM cj.date) = %s AND EXTRACT(MONTH FROM cj.date) = %s
+            GROUP BY s.name
+            ORDER BY total_income DESC;
+            """,
+            params=( current_year, current_month,)
         )
         row = await data.fetchall()
         logger.info("Row is %s", row)
