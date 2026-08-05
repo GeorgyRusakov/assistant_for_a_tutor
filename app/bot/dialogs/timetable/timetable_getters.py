@@ -31,28 +31,28 @@ async def timetable_view_getter(dialog_manager: DialogManager, local: dict, **kw
     current_page = await dialog_manager.find('id_stub_scroll').get_page()
     conn: AsyncConnection = dialog_manager.middleware_data.get('conn')
     ru_day_dict = dialog_manager.dialog_data.get('ru_day_dict')
-    day_week = ru_day_dict.get(current_page)
+    day_week: str = ru_day_dict.get(current_page)
     timetable = await get_timetable(conn=conn, day_week=day_week)
 
     if timetable:
-        table_text = "```\n"
-        table_text += "┌────┬──────────────────┬────────────────────┬──────────────┐\n"
-        table_text += "│ №  │ Ученик           │ Предмет            │ Время        │\n"
-        table_text += "├────┼──────────────────┼────────────────────┼──────────────┤\n"
-
+        table_text = "```\n\n"
+        table_text += "═" * 25 + "\n\n"
         for idx, lesson in enumerate(timetable, 1):
-            name = lesson[0][:16].ljust(16)
-            subject = lesson[1][:18].ljust(18)
-            time = str(lesson[3]).ljust(12)
-            table_text += f"│ {idx:2d} │ {name} │ {subject} │ {time} │\n"
+            name = lesson[0]  # Имя ученика
+            subject = lesson[1]  # Предмет
+            time = lesson[3]  # Время
 
-        table_text += "└────┴──────────────────┴────────────────────┴──────────────┘\n"
+            table_text += f"{idx}. 👤 {name}\n"
+            table_text += f"   📚 {subject}\n"
+            table_text += f"   🕐 {time}\n\n"
+
+        table_text += "═" * 25
         table_text += "```"
     else:
         table_text = "📅 В этот день занятий нет"
 
     return {
-        'ru_day': day_week,
+        'ru_day': day_week.capitalize(),
         'timetable_text': table_text
     }
 

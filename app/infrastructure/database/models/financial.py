@@ -7,3 +7,10 @@ class FinancialData:
     name: str
     number: int
     total: int
+
+@dataclass
+class GeneralFinancialData:
+    """DTO для общей статистики за все время"""
+    month: int
+    volume: int
+    total: int

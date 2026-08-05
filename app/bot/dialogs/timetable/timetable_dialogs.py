@@ -50,7 +50,7 @@ timetable_dlg = Dialog(
     ),
     # Окно просмотра расписания
     Window(
-        Format('🗒{ru_day} \n'),
+        Format('🗓{ru_day} \n'),
         Format('{timetable_text}'),
         # html_text,
         StubScroll(id='id_stub_scroll', pages=7),

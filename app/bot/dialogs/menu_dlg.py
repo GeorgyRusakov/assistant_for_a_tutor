@@ -25,21 +25,21 @@ main_menu = Dialog(
                     id='go_journal_dialog',
                     state=states.ClassJournal.preview),
                 Start(
-                    text=Const('📊📈 Фин. отчетность'),
+                    text=Const('📊📈 Отчетность'),
                     id='button_2',
                     state=states.Finance.finpreview),
             ),
             Row(
                 Start(
-                    text=Const('🆕 Добавление/удаление учеников'),
+                    text=Const('👨‍🎓👩‍🎓 Студенты'),
                     id='go_add_dialog',
                     state=states.AddDeleteStud.select_opt),
                 Start(
-                    text=Const('📆🕒 Расписание занятий'),
+                    text=Const('📆🕒 Расписание'),
                     id='go_timetable_dialog',
                     state=states.Timetable.preview),
                 Button(
-                    text=Const('📌📝 Заметки по ученикам'),
+                    text=Const('📌📝 Заметки'),
                     id='button_3',
                     on_click=button_clicked),
             ),
@@ -49,4 +49,3 @@ main_menu = Dialog(
         state=states.StartWork.menu,
     ),
 )
-

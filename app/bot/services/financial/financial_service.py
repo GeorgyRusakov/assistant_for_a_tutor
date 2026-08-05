@@ -3,15 +3,10 @@ from typing import List, Tuple
 from datetime import datetime, timedelta, date
 
 from aiogram_dialog import DialogManager
-from aiogram_dialog.widgets.input import ManagedTextInput
-from aiogram_dialog.widgets.kbd import ManagedRadio, ManagedListGroup, ManagedCheckbox, ManagedCounter
-
-from ..constants.widget_ids import WIDGETS
-from ...infrastructure.database.models.student import StudentData
-from ...infrastructure.database.db import get_sum_price_week, get_statistics_for_the_week, get_sum_price_month, get_statistics_for_the_month
-from ..constants.widget_ids import WIDGETS
+from ...constants.widget_ids import WIDGETS
 from psycopg import AsyncConnection
-from ...infrastructure.database.models.financial import FinancialData
+from ....infrastructure.database.models.financial import FinancialData
+from ....infrastructure.database.db import get_sum_price_week, get_statistics_for_the_week, get_sum_price_month, get_statistics_for_the_month
 
 
 logger = logging.getLogger(__name__)
@@ -33,15 +28,15 @@ class BaseFinancialService:
             table_text += "├──────────────────┼────────┼───────┤\n"
 
             for statistic in statistics:
-                name = statistic.name[:16].ljust(16)
+                name = statistic.name[:18].ljust(16)
                 number = str(statistic.number).ljust(6)
                 total = str(statistic.total).ljust(5)
                 table_text += f"│{name}  │{number}  │{total}  │ \n"
-
+                # table_text += "└────────────┴────────┴────────────────┘\n"
             table_text += "└──────────────────┴────────┴───────┘\n"
             table_text += "```"
         else:
-            table_text = 'На этой неделе пока не было занятий'
+            table_text = 'За данный период занятий не было'
 
         return table_text
 
@@ -108,7 +103,7 @@ class WeekFinancialService(BaseFinancialService):
 
             logger.info('Статистика за неделю: %s', statistics)
 
-            if not statistics[0]:
+            if not statistics:
                 return []
 
             return [FinancialData(*statistic) for statistic in statistics]
@@ -119,14 +114,14 @@ class WeekFinancialService(BaseFinancialService):
 
 class MonthFinancialService(BaseFinancialService):
     """
-    Сервис для составления финансовой отчетности за неделю
+    Сервис для составления финансовой отчетности за месяц
     """
 
     def __init__(self, dialog_manager: DialogManager):
         super().__init__(dialog_manager)
 
     async def make_month_report(self) -> tuple[int, str]:
-        """Собирает итоговый результат для отчета за неделю"""
+        """Собирает итоговый результат для отчета за месяц"""
         year_month: tuple = self._get_current_date_month()
 
         conn: AsyncConnection = self.dm.middleware_data.get(WIDGETS.DIALOG_CONNECTION)
@@ -137,6 +132,24 @@ class MonthFinancialService(BaseFinancialService):
         res_sum_month = await self._get_sum_price_for_report_month(conn, *year_month)
 
         statistics = await self._get_statistics_for_the_month(conn, *year_month)
+
+        res_report_table = self._generate_financial_table(statistics)
+
+        logger.info('Получили отчет за месяц: %s, %s', res_sum_month, res_report_table)
+
+        return (res_sum_month, res_report_table)
+
+    async def make_select_month_report(self, selected_year, selected_month) -> tuple[int, str]:
+        """Собирает итоговый результат для отчета за выбранный пользователем месяц"""
+
+        conn: AsyncConnection = self.dm.middleware_data.get(WIDGETS.DIALOG_CONNECTION)
+
+        if not conn:
+            raise RuntimeError("Соединение с БД не найдено")
+
+        res_sum_month = await self._get_sum_price_for_report_month(conn, selected_year, selected_month)
+
+        statistics = await self._get_statistics_for_the_month(conn, selected_year, selected_month)
 
         res_report_table = self._generate_financial_table(statistics)
 
@@ -178,7 +191,7 @@ class MonthFinancialService(BaseFinancialService):
 
             logger.info('Статистика за месяц: %s', statistics)
 
-            if not statistics[0]:
+            if not statistics:
                 return []
 
             return [FinancialData(*statistic) for statistic in statistics]

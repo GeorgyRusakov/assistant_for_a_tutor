@@ -137,7 +137,7 @@ async def get_subject_stud(conn: AsyncConnection, id_student) -> tuple[Any, ...]
     async with conn.cursor() as cursor:
         data = await cursor.execute(
             query="""
-           SELECT subject.id, subject.name FROM subject
+            SELECT subject.id, subject.name FROM subject
             JOIN subject_students AS sub_stud ON sub_stud.id_subject = subject.id
             Where sub_stud.id_student = %s
             """,
@@ -252,8 +252,8 @@ async def get_statistics_for_the_month(conn: AsyncConnection,  current_year, cur
         return row if row else None
 
 
-# Функция получения списка уникальных годов
 async def get_classes_by_year(conn: AsyncConnection) -> tuple[Any, ...] | None:
+    """Получает список уникальных годов, за которые проходили занятия"""
     async with conn.cursor() as cursor:
         data = await cursor.execute(
             query="""
@@ -318,15 +318,35 @@ async def get_completed_lesson(conn: AsyncConnection, current_month) -> tuple[An
 
 
 # Функция для получения статистики суммы занятий по месяцам
-async def get_sum_months(conn: AsyncConnection, current_month) -> tuple[Any, ...] | None:
+async def get_general_statistics_for_the_year(conn: AsyncConnection, year) -> tuple[Any, ...] | None:
+    """Получает статистику за год по месяцам"""
     async with conn.cursor() as cursor:
         data = await cursor.execute(
             query="""
-               SELECT EXTRACT(MONTH FROM cls.date) as month, SUM(sub_stud.price) FROM subject_students AS sub_stud
+               SELECT EXTRACT(MONTH FROM cls.date) as month, COUNT(*) AS count_classes,
+               SUM(sub_stud.price) FROM subject_students AS sub_stud
                JOIN class_journal AS cls ON cls.id_subject_students = sub_stud.id
+			   WHERE EXTRACT(YEAR FROM cls.date) = %s
                GROUP BY month
+			   ORDER BY month ASC
                """,
-            params=(current_month,)
+            params=(year,)
+        )
+        row = await data.fetchall()
+        logger.info("Row is %s", row)
+        return row if row else None
+
+
+async def get_general_sum_year(conn: AsyncConnection, year) -> tuple[Any, ...] | None:
+    """Получает общую сумму занятий за год"""
+    async with conn.cursor() as cursor:
+        data = await cursor.execute(
+            query="""
+            SELECT SUM(sub_stud.price) FROM subject_students AS sub_stud
+            JOIN class_journal AS cls ON cls.id_subject_students = sub_stud.id
+            WHERE EXTRACT(YEAR FROM cls.date) = %s;
+            """,
+            params=(year,)
         )
         row = await data.fetchone()
         logger.info("Row is %s", row)

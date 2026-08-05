@@ -28,3 +28,4 @@ psycopg[binary]
 babel==2.18.0
 aiogram_dialog==2.5.0
 aiohttp-socks
+matplotlib==3.11.1

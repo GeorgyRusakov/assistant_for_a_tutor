@@ -40,8 +40,10 @@ class Timetable(StatesGroup):
 
 class Finance(StatesGroup):
     finpreview = State()
-    fin_report = State()
     fin_report_week = State()
     fin_report_month = State()
-    fin_report_months = State()
+    select_fin_report_by_month = State()
+    select_fin_report_by_year = State()
+    selected_fin_report_by_month_year = State()
+    select_general_fin_report_by_year = State()
     fin_all_time_report = State()
