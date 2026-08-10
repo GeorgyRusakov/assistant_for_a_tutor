@@ -12,25 +12,6 @@ from .timetable_getters import timetable_preview_getter, timetable_view_getter, 
 from .timetable_handlers import hour_click, minute_click, sending_timetable_data
 
 
-# html_text = Jinja("""
-# <b>📚 Расписание занятий на {{ ru_day }}</b>
-
-# {% if timetable %}
-# <pre>
-# ┌────┬──────────────────┬────────────────────┬──────────────┐
-# │ №  │ Ученик           │ Предмет            │ Время        │
-# ├────┼──────────────────┼────────────────────┼──────────────┤
-# {% for lesson in timetable %}
-# │ {{ '{:2d}'.format(loop.index) }} │ {{ '{:<16}'.format(lesson[0][:16]) }} │ {{ '{:<18}'.format(lesson[1][:18]) }} │ {{ '{:<12}'.format(lesson[3][:12]) }} │
-# {% endfor %}
-# └────┴──────────────────┴────────────────────┴──────────────┘
-# </pre>
-# {% else %}
-# <i>📅 В этот день занятий нет</i>
-# {% endif %}
-# """)
-
-
 timetable_dlg = Dialog(
     # Окно выбора дейтсвия просмотра/добавления/удаления расписания
     Window(

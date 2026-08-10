@@ -53,9 +53,9 @@ services:
       - app_network
 
   bot:
-    # build: .
-    # container_name: tutor-bot
-    image: tutor-bot:latest
+    build: .
+    container_name: tutor-bot
+    # image: tutor-bot:latest
     ports:
       - "8000:8000"
     env_file:

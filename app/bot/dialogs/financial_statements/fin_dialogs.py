@@ -21,7 +21,7 @@ finpreview = Window(
         SwitchTo(Const('Текущая неделя'), id='sw1', state=states.Finance.fin_report_week),
         SwitchTo(Const('Текущий месяц'), id='sw2', state=states.Finance.fin_report_month),
         SwitchTo(Const('Выбрать период'), id='sw3', state=states.Finance.select_fin_report_by_year),
-        SwitchTo(Const('Общая статистика'), id='sw4', state=states.Finance.select_general_fin_report_by_year),
+        SwitchTo(Const('Статистика за год'), id='sw4', state=states.Finance.select_general_fin_report_by_year),
         MAIN_MENU_BUTTON,
     ),
     getter=finpreview_getter,

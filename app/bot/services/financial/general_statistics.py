@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib.ticker as ticker
 
 from typing import List, Tuple
-from datetime import datetime, timedelta, date
 
 from aiogram_dialog import DialogManager
 from ...constants.widget_ids import WIDGETS
@@ -22,6 +21,7 @@ class GeneralFinancialReport:
         self.dm = dialog_manager
 
     async def make_general_statistics(self, year):
+        """Собирает весь отчет воедино"""
         conn: AsyncConnection = self.dm.middleware_data.get(WIDGETS.DIALOG_CONNECTION)
 
         if not conn:
@@ -45,6 +45,7 @@ class GeneralFinancialReport:
 
 
     def _generate_graph(self, statistics: List[GeneralFinancialData], year, months):
+        """Генерирует столбчатую диаграмму на осонове полученной статистики"""
         total = [0] * 12
 
         for data in statistics:
@@ -92,7 +93,7 @@ class GeneralFinancialReport:
 
         ax.set_ylabel('Сумма, ₽', rotation=0, labelpad=10, ha='right', va='center')
 
-        folder = 'C:/Users/rusak/OneDrive/Рабочий стол/PythonProject/TelegramBots/TutorHelper/assistant_for_a_tutor/graphs'
+        folder = 'graphs'
         os.makedirs(folder, exist_ok=True)
         plt.savefig(os.path.join(folder, f'Статистика, {year} г..png'), facecolor='#181717', bbox_inches='tight')
 
@@ -111,7 +112,6 @@ class GeneralFinancialReport:
                 volume = str(dt.volume).ljust(6)
                 total = str(dt.total).ljust(5)
                 table_text += f"│{month}  │{volume}  │{total}  │ \n"
-                # table_text += "└────────────┴────────┴────────────────┘\n"
             table_text += "└──────────────┴────────┴───────┘\n"
             table_text += "```"
         else:
@@ -120,18 +120,21 @@ class GeneralFinancialReport:
         return table_text
 
     def _get_months_list(self) -> list[str]:
+        """Получает список с названиями месяцев"""
         months_names = get_month_names(
                 "wide", context="stand-alone", locale='ru_RU',
             )
         return list(months_names.values())
 
     def _get_months_dict(self) -> list[str]:
+        """Получает словарь с названиями месяцев"""
         months_names = get_month_names(
                 "wide", context="stand-alone", locale='ru_RU',
             )
         return dict(months_names.items())
 
     async def _prepare_data_for_table(self, statistics: GeneralFinancialData, months_dict: dict) -> list[GeneralFinancialData]:
+        """Подготовливает данные для генерации таблицы"""
         total = [[months_dict[i], 0, 0] for i in range(1, 13)]
 
         for st in statistics:
@@ -176,4 +179,5 @@ class GeneralFinancialReport:
 
 
 def create_general_financial_report(dialog_manager: DialogManager) -> GeneralFinancialReport:
+    """Фабрика по созданию сервиса отчетности за год"""
     return GeneralFinancialReport(dialog_manager)
